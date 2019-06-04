@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:gauge="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity"
+    android:background="@color/Black"
+    tools:layout_editor_absoluteY="81dp">
+
+    <de.nitri.gauge.Gauge
+        android:id="@+id/gauge1"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        gauge:labelTextSize="42"
+        gauge:maxValue="180"
+        gauge:minValue="0"
+        gauge:totalNicks="180"
+        gauge:valuePerNick="1.5"
+        gauge:faceColor="@color/Black"
+        gauge:scaleColor="@color/White"
+        gauge:needleColor="@color/Red"
+        gauge:upperText="KM/h"/>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+
+</RelativeLayout>
