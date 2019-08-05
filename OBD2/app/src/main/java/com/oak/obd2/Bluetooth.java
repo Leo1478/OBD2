@@ -23,6 +23,8 @@ public class Bluetooth {
     private AcceptThread mAcceptThread = null;
     private WorkerThread mWorkerThread = null;
     private BluetoothDevice mOBDDevice = null;
+    private BluetoothSocket mSocket = null;
+    private String uuid;
 
     Bluetooth() {
         mBluetoothAdapter= BluetoothAdapter.getDefaultAdapter();
@@ -40,8 +42,9 @@ public class Bluetooth {
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 //TODO: check whether this is OBD and whether it is connected
                 //by sending a command and check response
-                if (deviceName.contains("Mi")) {
+                if (deviceName.contains("OBD")) {
                     mOBDDevice = device;
+                    uuid = device.getUuids()[0].toString();
                     break;
                 }
             }
@@ -55,27 +58,29 @@ public class Bluetooth {
      * Start the chat service. Specifically start AcceptThread to begin a session
      * in listening (server) mode. Called by the Activity onResume()
      */
-    public synchronized void start()
+    public synchronized void connect()
     {
-        Log.d(TAG, "start");
-
-        // Cancel any thread attempting to make a connection
-        if (mConnectThread != null)
-        {
-            mConnectThread.cancel();
-            mConnectThread = null;
+        try {
+            // Get a BluetoothSocket to connect with the given BluetoothDevice.
+            // MY_UUID is the app's UUID string, also used in the server code.
+            mSocket = mOBDDevice.createRfcommSocketToServiceRecord(UUID.fromString(uuid));
+        } catch (IOException e) {
+            Log.e(TAG, "Socket's create() method failed", e);
         }
 
-        // Cancel any thread currently running a connection
-        if (mWorkerThread != null)
-        {
-            mWorkerThread.cancel();
-            mWorkerThread = null;
+        try {
+            // Connect to the remote device through the socket. This call blocks
+            // until it succeeds or throws an exception.
+            mSocket.connect();
+        } catch (IOException connectException) {
+            // Unable to connect; close the socket and return.
+            try {
+                mSocket.close();
+            } catch (IOException closeException) {
+                Log.e(TAG, "Could not close the client socket", closeException);
+            }
+            return;
         }
-
-        //mAcceptThread = new AcceptThread();
-        //mAcceptThread.run();
-        connect(mOBDDevice);
     }
 
     /**

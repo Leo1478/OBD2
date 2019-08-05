@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
 
         mBluetooth = new Bluetooth();
-        mBluetooth.start();
+        mBluetooth.connect();
     }
 
     @Override
