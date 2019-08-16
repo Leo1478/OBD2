@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toolbar;
 
+import java.io.IOException;
+
 import de.nitri.gauge.Gauge;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +31,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
 
         mBluetooth = new Bluetooth();
-        mBluetooth.connect();
+        try {
+            mBluetooth.connect();
+        } catch (IOException e) {
+        }
     }
 
     @Override

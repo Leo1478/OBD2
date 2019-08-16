@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -24,6 +25,7 @@ public class Bluetooth {
     private WorkerThread mWorkerThread = null;
     private BluetoothDevice mOBDDevice = null;
     private BluetoothSocket mSocket = null;
+    private BluetoothSocket mFallbackSocket = null;
     private String uuid;
 
     Bluetooth() {
@@ -49,17 +51,14 @@ public class Bluetooth {
                 }
             }
         }
-        if (mOBDDevice == null) {
-            return;
-        }
+        mBluetoothAdapter.cancelDiscovery();
     }
 
     /**
      * Start the chat service. Specifically start AcceptThread to begin a session
      * in listening (server) mode. Called by the Activity onResume()
      */
-    public synchronized void connect()
-    {
+    public synchronized void connect() throws IOException {
         try {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.
             // MY_UUID is the app's UUID string, also used in the server code.
@@ -72,14 +71,22 @@ public class Bluetooth {
             // Connect to the remote device through the socket. This call blocks
             // until it succeeds or throws an exception.
             mSocket.connect();
-        } catch (IOException connectException) {
-            // Unable to connect; close the socket and return.
+        } catch (IOException e1) {
+            Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
+            Class<?> clazz = mSocket.getRemoteDevice().getClass();
+            Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
             try {
+                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                Object[] params = new Object[]{Integer.valueOf(1)};
+                mFallbackSocket = (BluetoothSocket) m.invoke(mSocket.getRemoteDevice(), params);
+                mFallbackSocket.connect();
                 mSocket.close();
-            } catch (IOException closeException) {
-                Log.e(TAG, "Could not close the client socket", closeException);
+                mSocket = mFallbackSocket;
+            } catch (Exception e2) {
+                Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
+                mSocket.close();
+                //throw new IOException();
             }
-            return;
         }
     }
 
