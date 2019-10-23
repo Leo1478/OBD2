@@ -15,6 +15,6 @@ public class MainView extends View {
     public void onDraw(Canvas c) {
         Paint p = new Paint();
         p.setColor(Color.BLACK);
-        c.drawCircle(100,100,100,p);
+        //c.drawCircle(100,100,100,p);
     }
 }

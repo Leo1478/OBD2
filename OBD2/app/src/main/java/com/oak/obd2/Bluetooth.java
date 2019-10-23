@@ -27,6 +27,8 @@ public class Bluetooth {
     private BluetoothSocket mSocket = null;
     private BluetoothSocket mFallbackSocket = null;
     private String uuid;
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
     Bluetooth() {
         mBluetoothAdapter= BluetoothAdapter.getDefaultAdapter();
@@ -70,6 +72,7 @@ public class Bluetooth {
         try {
             // Connect to the remote device through the socket. This call blocks
             // until it succeeds or throws an exception.
+            // in my test, this always fail
             mSocket.connect();
         } catch (IOException e1) {
             Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
@@ -79,6 +82,7 @@ public class Bluetooth {
                 Method m = clazz.getMethod("createRfcommSocket", paramTypes);
                 Object[] params = new Object[]{Integer.valueOf(1)};
                 mFallbackSocket = (BluetoothSocket) m.invoke(mSocket.getRemoteDevice(), params);
+                //this can also fail. after I unpair and re-pair obd2 device from phone, it succeed again.
                 mFallbackSocket.connect();
                 mSocket.close();
                 mSocket = mFallbackSocket;
@@ -88,8 +92,39 @@ public class Bluetooth {
                 //throw new IOException();
             }
         }
+        inputStream = mSocket.getInputStream();
+        outputStream = mSocket.getOutputStream();
     }
 
+    public synchronized void sendRequest(String s) throws IOException
+    {
+        try {
+            outputStream.write((s + "\r").getBytes());
+        } catch (IOException e) {
+            //TODO: I saw random broken pipe error here. How to recover?
+            Log.e(TAG, "Bluetooth write error", e);
+        }
+    }
+
+    public synchronized  String readResponse() throws IOException
+    {
+        byte b = 0;
+        StringBuilder res = new StringBuilder();
+
+        // read until '>' arrives OR end of stream reached
+        char c;
+        // -1 if the end of the stream is reached
+        while (((b = (byte) inputStream.read()) > -1)) {
+            c = (char) b;
+            if (c == '>') // read until '>' arrives
+            {
+                break;
+            }
+            res.append(c);
+        }
+
+        return res.toString();
+    }
     /**
      * start connection to specified device
      *

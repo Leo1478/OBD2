@@ -14,14 +14,14 @@
         android:layout_height="300dp"
         android:layout_centerInParent="true"
         gauge:labelTextSize="42"
-        gauge:maxValue="180"
+        gauge:maxValue="60"
         gauge:minValue="0"
-        gauge:totalNicks="180"
-        gauge:valuePerNick="1.5"
+        gauge:totalNicks="60"
+        gauge:valuePerNick="1"
         gauge:faceColor="@color/Black"
         gauge:scaleColor="@color/White"
         gauge:needleColor="@color/Red"
-        gauge:upperText="KM/h"/>
+        gauge:upperText="RPMx100"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
